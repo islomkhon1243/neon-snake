@@ -159,7 +159,7 @@
   </div>
   <div class="hud">
     <div class="chip"><b id="score">0</b><i>СЧЁТ</i></div>
-    <div class="chip gold"><b id="best">0</b><i>РЕКОРД</i></div>
+    <div class="chip gold"><b id="best">0</b><i>МИРОВОЙ РЕКОРД</i></div>
     <div class="chip pink"><b id="level">1</b><i>УРОВЕНЬ</i></div>
     <div class="chip"><b id="len">3</b><i>ДЛИНА</i></div>
   </div>
@@ -256,7 +256,7 @@ var G = {
   food:null, bonus:null, score:0, eaten:0, level:1,
   step:BASE_STEP, acc:0, shake:0, flash:0, deadAt:0
 };
-var best  = parseInt(store.get('neonSnake.best','0'), 10) || 0;
+var best = 0; var globalRecords = {};
 var sound = store.get('neonSnake.sound','1') === '1';
 var walls = store.get('neonSnake.walls','1') === '1';
 var particles = [];
@@ -272,7 +272,8 @@ var skins=[{id:'neon',name:'Неон',hue:168,ok:function(){return true;}},
 {id:'fire',name:'Пламя · 10 золотых',hue:15,ok:function(){return progress.gold>=10;}},
 {id:'rainbow',name:'Радуга · комбо ×5',hue:0,ok:function(){return progress.combo>=5;}}];
 function bestKey(){return 'neonSnake.v2.best.'+mode+'.'+(walls?'walls':'wrap');}
-function loadBest(){best=parseInt(store.get(bestKey(),'0'),10)||0;hud();}
+function loadBest(){best=globalRecords[mode+'-'+(walls?'walls':'wrap')]||0;hud();}
+window.addEventListener('snake:ranking',function(e){globalRecords[e.detail.board]=e.detail.score;loadBest();});
 function notify(t){$('toast').textContent=t;}
 function saveProgress(){store.set('neonSnake.progress',JSON.stringify(progress));renderProgress();}
 function renderProgress(){
@@ -391,7 +392,7 @@ function burst(gx, gy, color, n, power){
 /* ---------- HUD ---------- */
 function hud(){
   elScore.textContent = G.score;
-  elBest.textContent  = best;
+  elBest.textContent = mode==='zen'?'—':(Object.prototype.hasOwnProperty.call(globalRecords,mode+'-'+(walls?'walls':'wrap'))?best:'—');
   elLevel.textContent = G.level;
   elLen.textContent   = G.snake.length;
 }
@@ -433,12 +434,12 @@ function die(win){
   burst(head.x, head.y, win ? '124,255,90' : '255,61,240', 46, 190);
   sfxDie();
   var rec = G.score > best;
-  if(rec){ best = G.score; store.set(bestKey(), best); }
+  // Global record is refreshed only after the server accepts the score.
   hud();
   $('deadTitle').textContent = win ? 'ПОБЕДА!' : 'GAME OVER';
   $('deadScore').textContent = G.score;
   $('deadInfo').textContent  = 'Длина ' + G.snake.length + ' · уровень ' + G.level + ' · рекорд ' + best;
-  show($('recordBadge'), rec && G.score > 0);
+  show($('recordBadge'), false);
   setTimeout(function(){ if(G.state === 'dead') show(ovDead, true); }, 420);
 }
 
@@ -755,7 +756,7 @@ function toggleMode(){
   store.set('neonSnake.walls', walls ? '1' : '0');
   var b = $('btnMode');
   b.textContent = walls ? '◼ СТЕНЫ' : '↔ СКВОЗЬ КРАЯ';
-  b.classList.toggle('off', !walls);loadBest();
+  b.classList.toggle('off', !walls);loadBest();window.dispatchEvent(new CustomEvent('snake:board',{detail:{board:window.neonBoard()}}));
 }
 $('btnStart').addEventListener('click', start);
 $('btnAgain').addEventListener('click', start);
@@ -771,7 +772,7 @@ document.addEventListener('visibilitychange', function(){ if(document.hidden) pa
 $('btnSkill').onclick=useSkill;
 $('btnMenu').onclick=menu;
 $('modeSelect').value=mode;
-$('modeSelect').onchange=function(){mode=this.value;store.set('neonSnake.mode',mode);menu();loadBest();reset();};
+$('modeSelect').onchange=function(){mode=this.value;store.set('neonSnake.mode',mode);menu();loadBest();reset();window.dispatchEvent(new CustomEvent('snake:board',{detail:{board:window.neonBoard()}}));};
 $('skinSelect').onchange=function(){skin=this.value;store.set('neonSnake.skin',skin);};
 /* ---------- инициализация ---------- */
 if('ontouchstart' in window || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
@@ -779,6 +780,7 @@ if(!sound){ $('btnSound').textContent = '♪ ЗВУК ВЫКЛ'; $('btnSound').c
 if(!walls){ $('btnMode').textContent = '↔ СКВОЗЬ КРАЯ'; $('btnMode').classList.add('off'); }
 resize();
 reset();
+window.neonBoard=function(){return mode==='zen'?null:mode+'-'+(walls?'walls':'wrap');};
 G.state = 'menu';
 renderProgress();loadBest();lockSettings(false);status();
 requestAnimationFrame(loop);

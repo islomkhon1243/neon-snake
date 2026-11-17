@@ -20,7 +20,7 @@ setup();g.skill='ghost';t.useSkill();g.snake=[{x:5,y:5},{x:5,y:6},{x:6,y:6},{x:6
 setup('zen');g.snake=[{x:5,y:5},{x:5,y:6},{x:6,y:6},{x:6,y:5},{x:7,y:5}];g.food={x:20,y:20};t.step();assert.equal(g.state,'playing');assert.equal(new Set(g.snake.map(p=>p.x+','+p.y)).size,g.snake.length);
 setup('zen');g.snake=[{x:23,y:5},{x:22,y:5},{x:21,y:5}];t.step();assert.equal(g.snake[0].x,0);
 setup();g.eaten=14;foodAhead();t.step();assert.equal(g.state,'upgrade');assert.equal(el('choices').children.length,3);const n=g.snake.length;t.turn('down');assert.equal(g.queue.length,0);el('choices').children[0].onclick();assert.equal(g.state,'paused');
-setup();t.toggleMode();g.score=123;t.die(false);assert.equal(storage['neonSnake.v2.best.adventure.walls'],123);t.setWalls(false);t.loadBest();assert.equal(t.getBest(),0);
+setup();t.toggleMode();g.score=123;t.die(false);assert.equal(storage['neonSnake.v2.best.adventure.walls'],undefined);t.setWalls(false);t.loadBest();assert.equal(t.getBest(),0);
 t.menu();assert.equal(el('modeSelect').disabled,false);
 console.log('PASS: combo, classic scoring, skill cooldown, pause, tail shedding, collisions, ghost, Zen wrap/recovery, upgrade selection, separate records, menu.');
 

@@ -7,6 +7,7 @@
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
     try{
       const r=await fetch('/api/'+path,{method:data===undefined?'GET':'POST',credentials:'same-origin',headers:data===undefined?{}:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data),signal:controller.signal});
+      if(!r.headers.get('content-type')?.includes('application/json'))throw Error('Сервер рейтинга не опубликован. Нужен полный деплой из GitHub с Netlify Functions.');
       const b=await r.json();if(!r.ok)throw Error(b.error||'Ошибка сервера');return b;
     }catch(e){throw Error(e.name==='AbortError'?'Сервер не отвечает. Повтори позже.':e.message);}
     finally{clearTimeout(timer);}
@@ -15,7 +16,8 @@
     if(loading)return;loading=true;
     const board=$('rankBoard').value;
     try{
-      await session;const b=await api('leaderboard?board='+encodeURIComponent(board));
+      const b=await api('leaderboard?board='+encodeURIComponent(board));
+      window.dispatchEvent(new CustomEvent('snake:ranking',{detail:{board,score:b.rows[0]?.score||0}}));
       if(board!==$('rankBoard').value)return;
       $('rankRows').replaceChildren();
       b.rows.forEach(r=>{
@@ -67,5 +69,7 @@
   $('rankBoard').onchange=refresh;
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
   setInterval(()=>{if(!document.hidden)refresh();},30000);
-  connect();refresh();
+  window.addEventListener('snake:board',e=>{if(e.detail.board){$('rankBoard').value=e.detail.board;refresh();}});
+  if(window.neonBoard?.())$('rankBoard').value=window.neonBoard();
+  connect().then(refresh).catch(refresh);
 })();
