@@ -62,6 +62,12 @@ docker compose up --build -d
 
 ## Файлы
 
-`public/index.html` — игра; `public/online.js` — интерфейс рейтинга; `server.mjs` — сервер и миграции; `test/` — API-тесты; `.github/workflows/test.yml` — CI; `render.yaml` — деплой; `compose.yaml` — локальный Docker.
+`dist/index.html` — игра; `dist/online.js` — интерфейс рейтинга; `server.mjs` — сервер и миграции; `test/` — API-тесты; `.github/workflows/test.yml` — CI; `render.yaml` — деплой; `compose.yaml` — локальный Docker.
 
 Документация: https://render.com/docs/blueprint-spec · https://render.com/docs/disks · https://nodejs.org/api/sqlite.html
+
+## Netlify: публикация игры
+
+В корне есть netlify.toml. При подключении GitHub выберите ветку main, оставьте Base directory и Build command пустыми, Publish directory — dist. При ручной загрузке перетащите папку dist: внутри неё находятся index.html и online.js.
+
+Эта конфигурация публикует только клиентскую игру. Node.js API и SQLite из server.mjs не запускаются при статической публикации на Netlify, поэтому общий рейтинг на таком деплое недоступен. Для него нужна отдельная адаптация серверной части или подключение работающего API. Локальная игра и личные рекорды работают.

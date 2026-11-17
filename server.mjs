@@ -38,7 +38,7 @@ export function createApp({dbPath=process.env.DB_PATH||resolve(root,'data/snake.
     res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'self'; base-uri 'none'; form-action 'self'");
     try{
       const url=new URL(req.url,'http://localhost');
-      if(req.method==='GET'&&assets.has(url.pathname)){const [file,type]=assets.get(url.pathname);res.writeHead(200,{'Content-Type':type,'Cache-Control':'no-cache'});res.end(readFileSync(resolve(root,'public',file)));return;}
+      if(req.method==='GET'&&assets.has(url.pathname)){const [file,type]=assets.get(url.pathname);res.writeHead(200,{'Content-Type':type,'Cache-Control':'no-cache'});res.end(readFileSync(resolve(root,'dist',file)));return;}
       if(req.method==='GET'&&url.pathname==='/health'){db.prepare('SELECT 1').get();return json(res,200,{ok:true});}
       if(!url.pathname.startsWith('/api/'))throw fail(404,'Не найдено.');
       if(!['GET','POST'].includes(req.method))throw fail(405,'Метод не поддерживается.');

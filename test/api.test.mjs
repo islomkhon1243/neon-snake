@@ -43,8 +43,8 @@ test('two visitors, persistence, ranking isolation, idempotency, rejected forger
 });
 
 test('browser scripts parse and game emits captured run data',()=>{
- const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../dist/index.html',import.meta.url),'utf8');
  const game=html.match(/<script>([\s\S]*?)<\/script>/)[1];
- new vm.Script(game);new vm.Script(readFileSync(new URL('../public/online.js',import.meta.url),'utf8'));
+ new vm.Script(game);new vm.Script(readFileSync(new URL('../dist/online.js',import.meta.url),'utf8'));
  assert.match(game,/snake:start/);assert.match(game,/snake:end/);assert.match(game,/G.gold\+\+/);
 });
