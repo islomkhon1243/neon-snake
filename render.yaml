@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: neon-snake
+    runtime: docker
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /app/data/snake.sqlite
+    disk:
+      name: snake-data
+      mountPath: /app/data
+      sizeGB: 1
